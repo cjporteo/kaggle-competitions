@@ -120,6 +120,77 @@ X_full = featureProcessing(pd.concat([X_train, X_test]))
 X_train = X_full[:train_size]
 X_test = X_full[train_size:]
 
+#Tunes the respective hyperparameters
+
+'''
+
+def RMSLE_cross_val(model):
+    return (-cross_val_score(model, X_train, np.log1p(y), scoring="neg_mean_squared_error", cv=5)).mean()
+
+#Hyperparameter vector space for ElasticNet
+alphas_en = np.arange(0.0005, 0.01, 0.0005)
+l1_ratios = np.arange(0.1, 0.9, 0.025)
+best_alpha_en, best_l1 = 0.0001, 0.1
+
+#Hyperparameter vector space for Ridge
+a_r = np.arange(1,10, 1, dtype=float)
+b_r = np.arange(-6, 5, 1, dtype=float)
+best_a_r, best_b_r = 1, -6
+
+#Hyperparameter vector space for Lasso
+a_l = np.arange(1,10, 1, dtype=float)
+b_l = np.arange(-6, 5, 1, dtype=float)
+best_a_l, best_b_l = 1, -6
+
+#Hyperparameter vector space for XGBoost
+n_estimators = np.arange(100, 1200, 100)
+learning_rates = np.arange(0.005, 0.15, 0.005)
+best_n, best_learn = 100, 0.005
+
+best_score = float('inf')
+print("ELASTICNET")
+for alpha in alphas_en:
+    for l1_ratio in l1_ratios:
+        score = RMSLE_cross_val(ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=10000, random_state=0))
+        #print(alpha, l1_ratio, score)
+        if score < best_score:
+            best_alpha_en, best_l1, best_score = alpha, l1_ratio, score
+print("BEST PARAMETERS: alpha = {}, l1-ratio = {} --- SCORE: {}\n:".format(best_alpha_en, best_l1, best_score))
+
+best_score = float('inf')
+print("RIDGE")
+for a in a_r:
+    for b in b_r:
+        alpha = a * 10**b
+        score = RMSLE_cross_val(Ridge(alpha=alpha, max_iter=10000, random_state=0))
+        #print(alpha, score)
+        if score < best_score:
+            best_a_r, best_b_r, best_score = a, b, score
+print("BEST PARAMETERS: alpha = {} --- SCORE = {}\n:".format(best_a_r * 10**best_b_r, best_score))
+
+best_score = float('inf')
+print("LASSO")
+for a in a_l:
+    for b in b_l:
+        alpha = a * 10**b
+        score = RMSLE_cross_val(Lasso(alpha=alpha, max_iter=10000, random_state=0))
+        #print(alpha, score)
+        if score < best_score:
+            best_a_l, best_b_l, best_score = a, b, score
+print("BEST PARAMETERS: alpha = {} --- SCORE: {}\n:".format(best_a_l * 10**best_b_l, best_score))
+
+best_score = float('inf')
+print("XGBOOST")
+for n in n_estimators:
+    for lr in learning_rates:
+        score = RMSLE_cross_val(XGBRegressor(n_estimators=n, learning_rate=lr, objective="reg:squarederror", n_jobs=-1, random_state=0))
+        #print(n, lr, score)
+        if score < best_score:
+            best_n, best_learn, best_score = n, lr, score
+print("BEST PARAMETERS: n_estimators = {}, learning_rate = {} --- SCORE: {}\n:".format(best_n, best_learn, best_score))
+
+'''
+
 model_EN = ElasticNet(alpha=0.0025, l1_ratio=0.15, max_iter=10000, random_state=0)
 model_EN.fit(X_train, np.log1p(y))
 EN_preds = model_EN.predict(X_test)
